@@ -15,7 +15,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r Import .tsv data}
 library(readr)
 
-wd <- setwd("C:/Users/anmdo/Desktop/Analysis_Wkspce/archive_2024_05_15__15_13_08/20240515_1239_dominiquez/") 
+#PC Working Directory
+#wd <- setwd("C:/Users/anmdo/Desktop/Analysis_Wkspce/archive_2024_05_15__15_13_08/20240515_1239_dominiquez/") 
+
+#Mac Working Directory
+wd <- setwd("/Users/andrewd/Desktop/Analysis_wkspce/OMAP_proteomics") 
+
 
 dataImport <- readr::read_tsv("Candidates.tsv")
 Comparisons <- unique(dataImport$`Comparison (group1/group2)`)
@@ -59,9 +64,8 @@ table(unlist(yeastSubset$`Comparison (group1/group2)`))
 
 
 ```{r}
-library(rtracklayer)
 library(GenomicFeatures)
-gtf <- import("C:/Users/anmdo/Desktop/Analysis_Wkspce/archive_2024_05_15__15_13_08/20240515_1239_dominiquez/GCF_000146045.2_R64_genomic.gtf")
-gtf <- data.frame(gtf)
-txdb <- makeTxDbFromGFF("C:/Users/anmdo/Desktop/Analysis_Wkspce/archive_2024_05_15__15_13_08/20240515_1239_dominiquez/GCF_000146045.2_R64_genomic.gtf")
+gtf <- data.frame(import("GCF_000146045.2_R64_genomic.gtf"))
+
+
 ```
