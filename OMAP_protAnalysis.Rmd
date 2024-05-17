@@ -1,0 +1,67 @@
+---
+title: "OMAP_MSanalysis"
+author: "Andrew Dominguez"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+```{r Import .tsv data}
+library(readr)
+
+wd <- setwd("C:/Users/anmdo/Desktop/Analysis_Wkspce/archive_2024_05_15__15_13_08/20240515_1239_dominiquez/") 
+
+dataImport <- readr::read_tsv("Candidates.tsv")
+Comparisons <- unique(dataImport$`Comparison (group1/group2)`)
+Comparisons
+
+```
+
+```{r remove non-yeast contaminates and append GO terms}
+library(tidyverse)
+yeastSubset <- dataImport %>% filter(Organisms == "Saccharomyces cerevisiae (strain ATCC 204508 / S288c)")
+
+
+```
+
+```{r subset on valid comparisons}
+DataSubset <- function(Subset) {
+  SubsetDF <- subset(yeastSubset, yeastSubset$`Comparison (group1/group2)`== Subset) #input subset here: "ITS2 FLX" 
+  SubsetValues <- dplyr::select(SubsetDF,`Comparison (group1/group2)`, Group, `AVG Group Quantity Numerator`, 
+                                `AVG Group Quantity Denominator`, `AVG Log2 Ratio`, Ratio, ProteinGroups, 
+                                ProteinNames, ProteinDescriptions, Genes, UniProtIds, Organisms,`Protein Coverage`,
+                                `Molecular Weight`, `# Unique Total Peptides`, `# Unique Total EG.Id`)
+  SubsetValues <- SubsetValues[order(SubsetValues$`AVG Log2 Ratio`),]
+  return(SubsetValues)
+}
+# colList <- colnames(DataSubset)
+# colList
+```
+
+```{r}
+#Comparison subsets 
+Pierce_dTvITS2 <- DataSubset("dT-Pierce / ITS2-Pierce")
+Pierce_ScrvITS2 <- DataSubset("Scramble-Pierce / ITS2-Pierce")
+Pierce_ScrvdT <- DataSubset("Scramble-Pierce / dT-Pierce")
+ITS2_DynavPierce <- DataSubset("ITS2-Dyna / ITS2-Pierce")
+ITS2_DynavPierce <- DataSubset("dT-Dyna / dT-Pierce")
+Dyna_dTvITS2 <- DataSubset("dT-Dyna / ITS2-Dyna")
+table(unlist(yeastSubset$`Comparison (group1/group2)`))
+
+```
+
+
+
+```{r}
+library(rtracklayer)
+library(GenomicFeatures)
+gtf <- import("C:/Users/anmdo/Desktop/Analysis_Wkspce/archive_2024_05_15__15_13_08/20240515_1239_dominiquez/GCF_000146045.2_R64_genomic.gtf")
+gtf <- data.frame(gtf)
+txdb <- makeTxDbFromGFF("C:/Users/anmdo/Desktop/Analysis_Wkspce/archive_2024_05_15__15_13_08/20240515_1239_dominiquez/GCF_000146045.2_R64_genomic.gtf")
+```
