@@ -110,7 +110,7 @@ GO_Plot <- function(Data){
 ```{r}
 #ITS2 and dT verses scramble
 
-Annotation_Param <- "CC" # GO annotations: biological process (BP), Cellular Component (CC), Molecular Function (MF)
+Annotation_Param <- "MF" # GO annotations: biological process (BP), Cellular Component (CC), Molecular Function (MF)
 GO_Pierce_ITS2 <- GO_call_denom(Pierce_ScrvITS2, Annotation_Param)
 GO_Pierce_ScrITS2 <- GO_call_numer(Pierce_ScrvITS2, Annotation_Param)
 
@@ -142,8 +142,10 @@ DistPlot <- ggplot(data=Pierce_ScrvITS2, aes(x=`AVG Group Quantity Denominator`,
   coord_cartesian(xlim = c(0, 500), ylim = c(0, 500)) +
   geom_abline(slope = 1, intercept = 0) +
   geom_point(data = Pierce_ScrvITS2 %>% filter(`AVG Log2 Ratio` > 1), color = "darkorange", alpha = 0.75) +
-  geom_point(data = Pierce_ScrvITS2 %>% filter(`AVG Log2 Ratio` < -1), color = "dodgerblue3", alpha = 0.75)
-
+  geom_point(data = Pierce_ScrvITS2 %>% filter(`AVG Log2 Ratio` < -1), color = "dodgerblue3", alpha = 0.75) +
+  ggtitle("Relative protein abundance between samples") +
+  xlab("Count in ITS2-sample") + ylab("Count in Scramble-sample")
+DistPlot
 #plot_GO_Pierce_ITS2 <- plot(barplot(GO_Pierce_ITS2, showCategory = 10 ) + ggtitle("Proteins enriched in ITS2-targeted labeling"))
 UpsetGO <- plot_spacer() + upsetplot(GO_Pierce_ITS2)
 
@@ -159,7 +161,9 @@ DistPlot <- ggplot(data=Pierce_ScrvdT, aes(x=`AVG Group Quantity Denominator`, y
   coord_cartesian(xlim = c(0, 500), ylim = c(0, 500)) +
   geom_abline(slope = 1, intercept = 0) +
   geom_point(data = Pierce_ScrvdT %>% filter(`AVG Log2 Ratio` > 1), color = "darkorange", alpha = 0.75) +
-  geom_point(data = Pierce_ScrvdT %>% filter(`AVG Log2 Ratio` < -1), color = "dodgerblue3", alpha = 0.75)
+  geom_point(data = Pierce_ScrvdT %>% filter(`AVG Log2 Ratio` < -1), color = "dodgerblue3", alpha = 0.75) +
+  ggtitle("Relative protein abundance between samples") +
+  xlab("Count in dT-sample") + ylab("Count in Scramble-sample")
 
 #plot_GO_Pierce_ITS2 <- plot(barplot(GO_Pierce_ITS2, showCategory = 10 ) + ggtitle("Proteins enriched in ITS2-targeted labeling"))
 UpsetGO <- plot_spacer() + upsetplot(GO_Pierce_dT)
@@ -177,7 +181,9 @@ DistPlot <- ggplot(data=Pierce_dTvITS2, aes(x=`AVG Group Quantity Denominator`, 
   coord_cartesian(xlim = c(0, 500), ylim = c(0, 500)) +
   geom_abline(slope = 1, intercept = 0) +
   geom_point(data = Pierce_dTvITS2 %>% filter(`AVG Log2 Ratio` > 1), color = "darkorange", alpha = 0.75) +
-  geom_point(data = Pierce_dTvITS2 %>% filter(`AVG Log2 Ratio` < -1), color = "dodgerblue3", alpha = 0.75)
+  geom_point(data = Pierce_dTvITS2 %>% filter(`AVG Log2 Ratio` < -1), color = "dodgerblue3", alpha = 0.75) +
+  ggtitle("Relative protein abundance between samples") +
+  xlab("Count in ITS2-sample") + ylab("Count in dT-sample")
 
 #plot_GO_Pierce_ITS2 <- plot(barplot(GO_Pierce_ITS2, showCategory = 10 ) + ggtitle("Proteins enriched in ITS2-targeted labeling"))
 UpsetGO <- plot_spacer() + upsetplot(GO_ITS2_Pierce_dTvITS2)
@@ -193,7 +199,9 @@ DistPlot <- ggplot(data=Pierce_dTvITS2, aes(x=`AVG Group Quantity Denominator`, 
   coord_cartesian(xlim = c(0, 500), ylim = c(0, 500)) +
   geom_abline(slope = 1, intercept = 0) +
   geom_point(data = Pierce_dTvITS2 %>% filter(`AVG Log2 Ratio` > 1), color = "darkorange", alpha = 0.75) +
-  geom_point(data = Pierce_dTvITS2 %>% filter(`AVG Log2 Ratio` < -1), color = "dodgerblue3", alpha = 0.75)
+  geom_point(data = Pierce_dTvITS2 %>% filter(`AVG Log2 Ratio` < -1), color = "dodgerblue3", alpha = 0.75) +
+  ggtitle("Relative protein abundance between samples") +
+  xlab("Count in ITS2-sample") + ylab("Count in dT-sample")
 
 #plot_GO_Pierce_ITS2 <- plot(barplot(GO_Pierce_ITS2, showCategory = 10 ) + ggtitle("Proteins enriched in ITS2-targeted labeling"))
 UpsetGO <- plot_spacer() + upsetplot(GO_dT_Pierce_dTvITS2)
@@ -207,7 +215,10 @@ DistPlot <- ggplot(data=Dyna_dTvITS2, aes(x=`AVG Group Quantity Denominator`, y=
   coord_cartesian(xlim = c(0, 500), ylim = c(0, 500)) +
   geom_abline(slope = 1, intercept = 0) +
   geom_point(data = Dyna_dTvITS2 %>% filter(`AVG Log2 Ratio` > 1), color = "darkorange", alpha = 0.75) +
-  geom_point(data = Dyna_dTvITS2 %>% filter(`AVG Log2 Ratio` < -1), color = "dodgerblue3", alpha = 0.75)
+  geom_point(data = Dyna_dTvITS2 %>% filter(`AVG Log2 Ratio` < -1), color = "dodgerblue3", alpha = 0.75) +
+  ggtitle("Relative protein abundance between samples (Dynabeads)") +
+  xlab("Count in ITS2-sample") + ylab("Count in dT-sample")
+  
 
 #plot_GO_Pierce_ITS2 <- plot(barplot(GO_Pierce_ITS2, showCategory = 10 ) + ggtitle("Proteins enriched in ITS2-targeted labeling"))
 UpsetGO_ITS2 <- plot_spacer() + upsetplot(GO_ITS2_Dyna_dTvITS2)
