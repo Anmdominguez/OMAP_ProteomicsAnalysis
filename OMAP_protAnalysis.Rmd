@@ -122,7 +122,14 @@ GOIs <-function(data){
 } 
 ```
 
+```{r identify and regress out Scramble enriched genes}
 
+ScrambleEnrich_dT <- subset(Pierce_ScrvdT, `AVG Log2 Ratio` > 0)
+ScrambleEnrich_ITS2 <- subset(Pierce_ScrvITS2, `AVG Log2 Ratio` > 0)
+ScrambleEnriched <- merge(ScrambleEnrich_dT, ScrambleEnrich_ITS2, by = "Genes")
+Pierce_dTvITS2_noScr <- anti_join(Pierce_dTvITS2, ScrambleEnriched, by = "Genes")
+
+```
 
 
 
@@ -139,6 +146,10 @@ GO_Pierce_ScrdT <- GO_call_numer(Pierce_ScrvdT, Annotation_Param)
 #ITS2 vs dT using Pierce beads
 GO_ITS2_Pierce_dTvITS2 <- GO_call_denom(Pierce_dTvITS2, Annotation_Param)
 GO_dT_Pierce_dTvITS2 <- GO_call_numer(Pierce_dTvITS2, Annotation_Param)
+
+#ITS2 vs dT using Pierce beads (Scr regressed out)
+GO_ITS2_Pierce_dTvITS2_NoScr <- GO_call_denom(Pierce_dTvITS2_noScr, Annotation_Param)
+GO_dT_Pierce_dTvITS2_NoScr <- GO_call_numer(Pierce_dTvITS2_noScr, Annotation_Param)
 
 #ITS2 vs dT using Dynabeads
 GO_ITS2_Dyna_dTvITS2 <- GO_call_denom(Dyna_dTvITS2, Annotation_Param)
@@ -241,6 +252,33 @@ ggsave("ITS2vdT_Pierce_Dist.png", plot = DistPlot, scale = 1, width = 2000, heig
 ggsave("ITS2vdT_Pierce_GO.png", plot = UpsetGO, scale = 1, width = 3000, height = 2000, units = "px", dpi = 300)
 ```
 
+```{r Results from ITS2 enriched genes from dT (Scr genes removed)}
+
+GOI_subset <- GOIs(Pierce_dTvITS2_noScr)
+DistPlot <- ggplot(data=Pierce_dTvITS2_noScr, aes(x=`AVG Group Quantity Denominator`, y=`AVG Group Quantity Numerator`)) + 
+  geom_point(alpha = 0.1) +
+  coord_cartesian(xlim = c(0, 500), ylim = c(0, 500)) +
+  geom_abline(slope = 1, intercept = 0) +
+  geom_point(data = Pierce_dTvITS2 %>% filter(`AVG Log2 Ratio` > 1), color = "darkorange", alpha = 0.75) +
+  geom_point(data = Pierce_dTvITS2 %>% filter(`AVG Log2 Ratio` < -1), color = "dodgerblue3", alpha = 0.75) +
+  ggtitle("Relative protein abundance between samples") +
+  xlab("Count in ITS2-sample") + ylab("Count in dT-sample") +
+  geom_point(data = GOI_subset, color = "darkorchid", alpha = 1) +
+  geom_text_repel(data = GOI_subset,
+                  aes(label = Genes),
+                  size = 3,
+                  box.padding = unit(1, "lines"),
+                  point.padding = unit(0.5, "lines"),
+                  min.segment.length = unit(0, 'lines'))
+DistPlot
+UpsetGO <-  upsetplot(GO_ITS2_Pierce_dTvITS2_NoScr) #may need to make use of "plot_spacer() +"
+
+ggsave("ITS2vdT_Pierce_Dist_noScr.png", plot = DistPlot, scale = 1, width = 2000, height = 2000, units = "px", dpi = 300)
+ggsave("ITS2vdT_Pierce_GO_noScr.png", plot = UpsetGO, scale = 1, width = 3000, height = 2000, units = "px", dpi = 300)
+```
+
+
+
 ```{r Results from dT enriched genes from ITS2 (Pierce beads)}
 
 UpsetGO <- plot_spacer() + upsetplot(GO_dT_Pierce_dTvITS2)
@@ -275,11 +313,46 @@ ggsave("ITS2_Dyna_GO.png", plot = UpsetGO_ITS2, scale = 1, width = 3000, height 
 #ggsave("dT_Dyna_GO.png", plot = UpsetGO_dT, scale = 1, width = 3000, height = 2000, units = "px", dpi = 300)
 ```
 
+```{r}
+library(org.Sc.sgd.db)
+library(ggVennDiagram)
+
+retrieved <- AnnotationDbi::select(org.Sc.sgd.db, keytype="GOALL", keys="GO:0005730", columns="ENSEMBL") 
+retrieved <- na.omit(retrieved)
+retrievedList <- unique(retrieved$ENSEMBL)
+
+hits <- Pierce_dTvITS2_noScr %>% filter(`AVG Log2 Ratio` < -1)
+hits <- data.frame(hits$UniProtIds)
+names(hits)[1] <- "uniprot_id"
+hits <- merge(hits, MergeMeta, by = "uniprot_id" )
+names(hits)[3] <- "ENSEMBL"
+NonNucleolarProts <- data.frame(anti_join(hits, retrieved, by="ENSEMBL"))
+
+NonNucleolarGO <- enrichGO(gene = NonNucleolarProts$ENSEMBL, OrgDb = "org.Sc.sgd.db", keyType = "ENSEMBL", ont = "CC")
+
+
+
+NucleolarVenn <- ggVennDiagram(list(hits$ENSEMBL, retrievedList),
+                               color = "black",
+                               label = "count",
+                               category.names = c("ITS2 OMAP","Nucleolar Prots")) +
+  theme(legend.position = "none") +
+  scale_fill_gradient(low = "#F4FAFE", high = "#F4FAFE") +
+  scale_x_continuous(expand = expansion(mult = .5)) 
+
+
+
+PlotMerge <-  NucleolarVenn + upsetplot(NonNucleolarGO)
+
+ggsave("Nucleolar_OL.png", plot = PlotMerge, scale = 1, width = 3000, height = 2000, units = "px", dpi = 300)
+```
+
 
 
 
 ```{bash}
+rm *.log
 mkdir outputs/
 mv *.png outputs/ 
-
 ```
+
